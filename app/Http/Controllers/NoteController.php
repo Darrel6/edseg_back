@@ -18,7 +18,79 @@ class NoteController extends Controller
      */
     public function index()
     {
-        //
+
+        $ue = [];
+        $moy = [];
+
+
+        $ues = Ue::all();
+        foreach ($ues as $note) {
+
+            /* $ecues = Ecue::where("ue_id", $note->id)->get(); */
+            $notes = Note::all()->groupBy(['formation']);
+/* 
+            $cumul = 0;
+            $i = 0;
+            $total_vald = 0;
+            $coef = 0;
+            $ec = []; */
+            foreach ($notes as $note) {
+                foreach ($note as $not) {
+
+                    /* 
+                    $coef = $coef + $not['ecue']['coeff'];
+                    $cumul = ($cumul + ($not['note_ecue'] * $not['ecue']['coeff'])) / $coef;
+                    $i++;
+
+                    if ($cumul >= 10) {
+                        $vald = 'V';
+                        $total_vald++;
+                    } else {
+                        $vald = 'NV';
+                    }
+
+
+
+                    $ec =  [
+                        'ecue_name' => $not['ecue']['name'],
+                        "coeff" => $not['ecue']['coeff'],
+                        "note_obtenu" => $not['note_ecue'],
+                        'note_coeff' => $not['note_ecue'] * $not['ecue']['coeff'],
+                    ];
+
+
+                    $moy =  [
+                        "totals_validée" => $total_vald,
+                        "validation" => $vald,
+                        "moyenne"  => $cumul,
+                        'ecues' => [$ec],
+                        'ue_id' => $not['ecue']['ue_id']
+
+
+                    ];
+
+
+                    $ecues = Arr::add($ue, "ue" . $not['ecue']['ue_id'], $moy);
+                }
+            } */
+                    $ue = [
+                        "name" => $not['name'],
+                        "prenom" => $not['prenom'],
+                        "matricule" => $not['matricule'],
+                        /*   "total_valide" => $total_vald, */
+                        'session' => $not['session'],
+                        'formation' => $not['formation'],
+                        /* "ue" => $ecues, */
+                    ];
+
+                    return response()->json([
+                        "status" => "success",
+                        "data" => [$ue],
+
+                    ]);
+                }
+            }
+        }
     }
 
     /**
@@ -79,22 +151,23 @@ class NoteController extends Controller
      */
     public function show($matricule)
     {
-
+        $result = [];
         $ue = [];
         $moy = [];
-       
-
+        $total_vald = 0;
         $ues = Ue::all();
         foreach ($ues as $note) {
 
             /* $ecues = Ecue::where("ue_id", $note->id)->get(); */
-            $notes = Note::where("matricule", $matricule)->with('ecue')->get()->toArray();
+            $notes = Note::where("matricule", $matricule)->with('ecue')->paginate(10);
+
 
             $cumul = 0;
             $i = 0;
-            $total_vald = 0;
+            $ecues = [];
             $coef = 0;
             $ec = [];
+
             foreach ($notes as $not) {
                 if ($not['ecue']['ue_id'] == $note->id) {
 
@@ -105,14 +178,13 @@ class NoteController extends Controller
 
                     if ($cumul >= 10) {
                         $vald = 'V';
-                        $total_vald++;
+
+                        $total_vald +=  $total_vald++;
                     } else {
                         $vald = 'NV';
                     }
-
-                    
-
                     $ec =  [
+
                         'ecue_name' => $not['ecue']['name'],
                         "coeff" => $not['ecue']['coeff'],
                         "note_obtenu" => $not['note_ecue'],
@@ -121,23 +193,29 @@ class NoteController extends Controller
 
 
                     $moy =  [
-                        "totals_validée" => $total_vald,
                         "validation" => $vald,
                         "moyenne"  => $cumul,
                         'ecues' => [$ec],
-                        'ue_id' => $not['ecue']['ue_id']
-
+                        'ue_id' => $not['ecue']['ue_id'],
 
                     ];
-
 
                     $ue = Arr::add($ue, "ue" . $not['ecue']['ue_id'], $moy);
                 }
             }
+            $ue += [
+                "name" => $not['name'],
+                "prenom" => $not['prenom'],
+                "matricule" => $not['matricule'],
+                "total_valide" => $total_vald,
+                'session' => $not['session'],
+                'formation' => $not['formation'],
+
+            ];
         }
 
 
-
+        $result = Arr::add($result, 'result', $ue);
         /*  $note_coeff = [];
         $val = [];
         foreach ($notes as $not) {
@@ -171,7 +249,7 @@ class NoteController extends Controller
 
         return response()->json([
             "status" => "success",
-            "data" => $ue,
+            "data" => $result,
 
         ]);
     }

@@ -29,7 +29,7 @@ class RegisteredUserController extends Controller
         $users = User::all();
         return response()->json([
             "status" => "success",
-            "data" => $users 
+            "data" => $users
         ]);
     }
 
@@ -215,6 +215,7 @@ class RegisteredUserController extends Controller
 
     public function logout(Request $request)
     {
+
         Auth::user()->tokens()->delete();
         return [
             'message' => 'Logged out'
@@ -251,7 +252,7 @@ class RegisteredUserController extends Controller
             ]
         );
 
-       
+
         if ($request->recu_paiement) {
             $recuName = time() . '.' . $request->recu_paiement->getClientOriginalExtension();
             $recupath = $request->file('recu_paiement')->storeAs(
@@ -260,13 +261,13 @@ class RegisteredUserController extends Controller
 
             );
         }
-       
+
         $user = User::where("id", $id)->update([
             "reference" => $request->reference,
             "num_transaction" => $request->num_transaction,
             "montant" => $request->montant,
             "date_paiement" => $request->date_paiement,
-            "recu_paiement" =>Storage::url($recupath),
+            "recu_paiement" => Storage::url($recupath),
             "paiement_status" => $request->paiement_status,
             'name' => $request->name,
             'email' => $request->email,
@@ -290,7 +291,7 @@ class RegisteredUserController extends Controller
             'piece_identite' => $request->piece_identite,
             'phone' => $request->phone,
             'wphone' => $request->wphone,
-            
+
         ]);
 
         return response()->json([
@@ -309,10 +310,9 @@ class RegisteredUserController extends Controller
             "data" => $user,
         ]);
     }
-     public function perform()
+    public function perform(Request $request)
     {
-
-        Auth::logout();
+        /* Auth::user()->token()->revoke(); */
         return response()->json([
             "status" => "success",
             "message" => 'Déconnexion reussie',

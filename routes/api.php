@@ -53,4 +53,6 @@ Route::get("/diplome/notification", [ActionController::class, "notifi"]);
 Route::post("/diplome/updateRq", [ActionController::class, "updaterq"]);
 Route::resource("diplome", DiplomeController::class)->except('create', 'edit');
 Route::resource("result", ResultController::class)->except('create', 'edit');
-Route::post('/logout', [RegisteredUserController::class, 'perform']); 
+ Route::post('/logout', [RegisteredUserController::class, 'perform']) ; 
+/* Route::post('/logout', [AuthenticatedSessionController::class, 'destroy']); */
+              
